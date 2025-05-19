@@ -1,35 +1,38 @@
-// PSEUDO CODE
-// Read button state
-
-// the idea is to run the loop and only require time precision when the button is pressed, because only them the first letter is being read.
-// permit the user to inform the EOW and them print the first letter to the monitor
-// wait for the user to inform the EOM and them print the full message to the monitor 
-// start a new message
-//
-// read a letter 
-//  print int to the segment display
-//  or inform that it could not be uderstood
-//
-//  wait for the next letter or the end of the word signal EOW
-// 
-//  repeat the above until the end of message signal EOM
-
+#include "SevSeg.h"
+/***********************************************************************************************************************/
 /* CONSTANTS */
+/***********************************************************************************************************************/
+SevSeg sevseg;
+const int A = 7; 
+const int B = 8;
+const int C = 9;
+const int D = 10;
+const int E = 11;
+const int F = 13; 
+const int G = 12;
+byte segmentPins[] = {A, B, C, D, E, F, G};
+
+const int button_MC = 2;
+const int button_EOL = 3;
+const int button_EOW = 4;
+const int button_EOM = 8;
+
+bool EOL = false;
+bool EOW = false;
+bool EOM = false;
+
+String morseCode = "";
+String message = "";
+int pressStartTime = 0;
+char currentElement = '\0';
+
 
 // Dit duration ms (dot)
-const int DIT = 1000; //
+const int DIT = 500; //
 // Dah duration ms (dash)
-const int DAH = 3000;
-// Space between dots and dashes
-const int INTER_GAP = DIT;
-// Space between letters
-const int SHORT_GAP = DAH;
-// Space between words
-const int MEDIUM_GAP = DAH*2 + DIT; 
+const int DAH = 1000;
 // Acceptable delay
-const unsigned int DELAY = 500;
-// Letter size
-const unsigned int LETTER_MAX_SIZE = 5*sizeof(DAH)/1000;
+const unsigned int DELAY = 250;
 
 // Morse code table
 typedef struct {
@@ -66,8 +69,39 @@ const letterCode MORSE_CODE_TABLE[] = {
 	{'z',  0b11100}
 };
 
+// Defining the 7-segment display characters
+int sevSegChars[35][8] {  
+              // A B C D E F G
+	          {'a',1,1,1,0,1,1,1},//A 
+	          {'b',0,0,1,1,1,1,1},//b 
+	          {'c',1,0,0,1,1,1,0},//C 
+	          {'d',0,1,1,1,1,0,1},//d 
+	          {'e',1,0,0,1,1,1,1},//E 
+	          {'f',1,0,0,0,1,1,1},//F 
+	          {'g',1,0,1,1,1,1,0},//G 
+	          {'h',0,1,1,0,1,1,1},//H 
+	          {'i',0,0,0,0,1,1,0},//I 
+	          {'j',1,1,1,1,1,0,0},//J 
+	          {'l',0,0,0,1,1,1,0},//L 
+	          {'m',0,0,1,0,1,0,1},//m 
+	          {'n',0,1,1,0,1,0,1},//n
+	          {'o',0,0,1,1,1,0,1},//o 
+	          {'p',1,1,0,0,1,1,1},//P 
+	          {'q',1,1,1,0,0,1,1},//q 
+	          {'r',0,0,0,0,1,0,1},//r 
+	          {'s',1,0,1,1,0,1,1},//S
+	          {'t',1,0,0,0,1,1,0},//T 
+	          {'u',0,1,1,1,1,1,0},//U
+	          {'v',0,1,0,1,0,1,1},//v
+	          {'w',1,0,1,1,1,0,0},//w 
+	          {'y',0,1,0,1,1,1,1},//y 
+	          {'z',1,1,0,1,1,0,1},//z 
+	          }; 
+/***********************************************************************************************************************/
 /* FUNCTIONS */
-
+/***********************************************************************************************************************/
+/* MORSE CODE FUNCTIONS */
+/***********************************************************************************************************************/
 /*
  * This function counts the time the button is pressed
 */
@@ -82,6 +116,9 @@ unsigned long int countTimeButtonPress(int buttonPin){
   return (endTime - startTime);
 }
 
+/*
+ * Return the dit or dah depending on the time the button has been pressed
+ */
 char dit_Or_Dah(unsigned long int time){
   char element = '\0';
 
@@ -93,6 +130,9 @@ char dit_Or_Dah(unsigned long int time){
   return element;
 }
 
+/*
+ * Convert a morse code to a binary mask
+ */
 unsigned int morseCodetoBin(String morseCode){
   unsigned int morseCodeBin = 1;
   for (int i = 0; i < morseCode.length(); i++){
@@ -106,6 +146,9 @@ unsigned int morseCodetoBin(String morseCode){
   return morseCodeBin;
 }
 
+/*
+ * Searchs for a letter in the binary mask morse code table
+ */
 char findLetterFromBinMorseCode(unsigned int morseCodeBin){
   for (int i = 0; i < sizeof(MORSE_CODE_TABLE)/sizeof(letterCode); i++){
     if (MORSE_CODE_TABLE[i].morseCode == morseCodeBin){
@@ -116,33 +159,62 @@ char findLetterFromBinMorseCode(unsigned int morseCodeBin){
   return '\0';
 }
 
+/*
+ * Converts a morse code to an ASCII character
+ */
 char morseToASCII(String morseCode){
   unsigned int morseCodeBin = morseCodetoBin(morseCode);
   char letter = findLetterFromBinMorseCode(morseCodeBin);
   return letter;
 }
 /***********************************************************************************************************************/
+/* 7 SEGMENT FUNCTIONS */
+/***********************************************************************************************************************/
+/*
+ * Write a letter to the 7-segment display
+ */
+void writeToSevSeg(char letter){
+  // Index -1 means the word was not found in the table
+  int index = -1;
+ 
+  // Search for the letter in the sevSegChars table
+  for (int i = 0; i < sizeof(sevSegChars)/sizeof(sevSegChars[0]); i++){
+    if (sevSegChars[i][0] == letter){
+      index = i;
+      break;
+    }
+  }
 
-const int button_MC = 2;
-const int button_EOL = 4;
-const int button_EOW = 7;
-const int button_EOM = 8;
-
-bool EOL = false;
-bool EOW = false;
-bool EOM = false;
-
-String morseCode = "";
-String message = "";
-int pressStartTime = 0;
-char currentElement = '\0';
-
+  // If the letter was in the table, write the input value to the corresponding segments
+  if (index != -1)
+    for (int i = 0; i < sizeof(segmentPins)/sizeof(byte); i++){
+     // NOTE: ANODE common means that the pins get lit if the voltage is low hence the negation in front of sevsegChars
+     digitalWrite(segmentPins[i], !sevSegChars[index][i+1]);
+  }
+  else{
+    // If the letter is not found, turn off all segments and print an error message
+    for (int i = 0; i < sizeof(segmentPins)/sizeof(byte); i++){
+      digitalWrite(segmentPins[i], LOW);
+    }
+    Serial.println("Letter " + String(letter) + " not found in the table.");
+  }
+}
+/***********************************************************************************************************************/
 void setup(){
   Serial.begin(9600);
   pinMode(button_MC, INPUT);
   pinMode(button_EOL, INPUT);
   pinMode(button_EOW, INPUT);
   pinMode(button_EOM, INPUT);
+
+  byte numDigits = 1;
+  byte digitPins[] = {6};
+  bool resistorOnSegments = false;
+  byte hardwareConfig = COMMON_ANODE; // Model 5161BS uses common anode 
+  bool updateWithDelays = false;
+  bool leadingZeros = false;
+  bool disableDecPoint = true;
+  sevseg.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorOnSegments, updateWithDelays, leadingZeros, disableDecPoint);
 }
 
 void loop(){
@@ -152,6 +224,7 @@ void loop(){
     currentElement = dit_Or_Dah(countTimeButtonPress(button_MC)); // convert the current button press to an elment
     if (currentElement != '\0'){ // only add the element to the letter if it is a valid one
       morseCode += currentElement;
+      Serial.print("current buffer: ");
       Serial.println(morseCode); // only print when the morse code is updated
     }
   }
@@ -165,7 +238,12 @@ void loop(){
       // If the morses code is valid, add its letter to the message
       if (currentElement != '\0'){
         message += currentElement;
-        Serial.println(currentElement);
+        Serial.println("morse code [" + morseCode + "]: " + currentElement);
+        // Show the letter on the 7-segment display
+        writeToSevSeg(currentElement);
+      }
+      else{
+        Serial.println("The code: " + morseCode + " has no match.");
       }
     }
   }

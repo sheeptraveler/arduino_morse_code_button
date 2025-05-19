@@ -1,7 +1,5 @@
 #include "morse_code.h"
 /***********************************************************************************************************************/
-/* FUNCTIONS */
-/***********************************************************************************************************************/
 /* MORSE CODE FUNCTIONS */
 /***********************************************************************************************************************/
 /*
@@ -20,6 +18,7 @@ unsigned long int countTimeButtonPress(int buttonPin){
 
 /*
  * Return the dit or dah depending on the time the button has been pressed
+ * '\0' means that the button was not in range for either of the two
  */
 char dit_Or_Dah(unsigned long int time){
   char element = '\0';
@@ -34,6 +33,8 @@ char dit_Or_Dah(unsigned long int time){
 
 /*
  * Convert a morse code to a binary mask
+ * binary masks always start with 0b1 and have 0 as dits or 1 as dahs. 
+ * 0b1x* = where x can be 0 or 1 and repeated
  */
 unsigned int morseCodetoBin(String morseCode){
   unsigned int morseCodeBin = 1;
@@ -50,6 +51,7 @@ unsigned int morseCodetoBin(String morseCode){
 
 /*
  * Searchs for a letter in the binary mask morse code table
+ * returns the char or the '\0' if the letter was not found
  */
 char findLetterFromBinMorseCode(unsigned int morseCodeBin){
   for (int i = 0; i < sizeof(MORSE_CODE_TABLE)/sizeof(letterCode); i++){
@@ -104,7 +106,7 @@ void writeToSevSeg(char letter){
 }
 
 /*
- * Write a message to the 7-segment display
+ * Write the string message to the 7-segment display
  */ 
  void writeMessageToSevSeg(String message){
   // Clear the display

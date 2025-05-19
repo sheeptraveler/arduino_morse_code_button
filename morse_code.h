@@ -20,9 +20,8 @@ const int button_MC = 2;
 const int button_EOL = 3;
 const int button_EOW = 4;
 
-bool EOL = false;
-bool EOW = false;
-bool EOM = false;
+bool EOL = false; // bouncing control EOL button
+bool EOW = false; // bouncing control EOW button
 
 String morseCode = "";
 String message = "";
@@ -30,21 +29,18 @@ unsigned long int pressTime = 0;
 char currentElement = '\0';
 
 
-// Dit duration ms (dot)
-const int DIT = 250; //
-// Dah duration ms (dash)
-const int DAH = 500;
-// Acceptable delay
-const unsigned int DELAY = 125;
-// CLR buffer
-const unsigned int CLR_BUFFER = 1000;
+const int DIT = 250; // Dit duration ms (dot)
+const int DAH = 500; // Dah duration ms (dash)
+const unsigned int DELAY = 125; // Acceptable delay
+const unsigned int CLR_BUFFER = 1000; // CLR buffer buttom press time ms
 
-// Morse code table
+// One morse code is composed by one character and its binary mask
 typedef struct {
   char letter;
   unsigned int morseCode;
 } letterCode;
 
+// Morse code table for decoding
 const letterCode MORSE_CODE_TABLE[] = {
   {'a',  0b101},    
 	{'b',  0b11000},
@@ -74,7 +70,7 @@ const letterCode MORSE_CODE_TABLE[] = {
 	{'z',  0b11100}
 };
 
-// Defining the 7-segment display characters
+// Defining how the 7-segment display write characters
 int sevSegChars[35][8] {  
               // A B C D E F G
 	          {'a',1,1,1,0,1,1,1},//A 

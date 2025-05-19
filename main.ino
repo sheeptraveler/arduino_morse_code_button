@@ -65,16 +65,22 @@ void loop(){
 
 /*  EOW Control */
   if (digitalRead(button_EOW) == HIGH && EOW == false){
-    EOW = true;
-    if (message.length() > 0){
-      if (message[message.length() - 1] != ' '){
-        message += ' '; // add a space to the word
-        Serial.println("message buffer: [ " + message + " ]");
-
+    pressTime = countTimeButtonPress(button_EOW); 
+    if (pressTime >= CLR_BUFFER){
+      message = "";
+      Serial.println("Message buffer cleared.");
+    }
+    else{
+      EOW = true;
+      if (message.length() > 0){
+        if (message[message.length() - 1] != ' '){
+          message += ' '; // add a space to the word
+          Serial.println("message buffer: [ " + message + " ]");
+        }
+        // write the message to the 7-segment display
+        writeMessageToSevSeg(message);
       }
     }
-    // write the message to the 7-segment display
-    writeMessageToSevSeg(message);
   }
   else if (digitalRead(button_EOW) == LOW && EOW == true){
     EOW = false; // reset EOW flag

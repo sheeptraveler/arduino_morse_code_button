@@ -19,7 +19,6 @@ byte segmentPins[] = {A, B, C, D, E, F, G};
 const int button_MC = 2;
 const int button_EOL = 3;
 const int button_EOW = 4;
-const int button_EOM = 8;
 
 bool EOL = false;
 bool EOW = false;

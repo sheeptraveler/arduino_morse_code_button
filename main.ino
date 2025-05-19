@@ -7,8 +7,7 @@ void setup(){
   pinMode(button_MC, INPUT);
   pinMode(button_EOL, INPUT);
   pinMode(button_EOW, INPUT);
-  pinMode(button_EOM, INPUT);
-
+  
   // SevSeg setup
   byte numDigits = 1;
   byte digitPins[] = {6};

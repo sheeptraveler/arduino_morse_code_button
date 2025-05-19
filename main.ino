@@ -74,7 +74,7 @@ void loop(){
       message = "";
       Serial.println("Message buffer cleared.");
     }
-    else if (EOW == false && digitalRead(button_EOW) == HIGH) {
+    else if (EOW == false) {
       // Need to access element in the message buffer, but only if its not empty
       if (message.length() > 0){
         // Only add space if the last character is not a space

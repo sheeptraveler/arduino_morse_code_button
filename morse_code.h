@@ -27,7 +27,7 @@ bool EOM = false;
 
 String morseCode = "";
 String message = "";
-int pressStartTime = 0;
+unsigned long int pressTime = 0;
 char currentElement = '\0';
 
 
@@ -37,6 +37,8 @@ const int DIT = 500; //
 const int DAH = 1000;
 // Acceptable delay
 const unsigned int DELAY = 250;
+// CLR buffer
+const unsigned int CLR_BUFFER = 2000;
 
 // Morse code table
 typedef struct {

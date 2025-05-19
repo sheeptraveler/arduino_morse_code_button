@@ -25,11 +25,18 @@ void loop(){
 /*  Morse Code receiver Control */
   // Read a morse code letter
   if (digitalRead(button_MC) == HIGH && EOL == false){
-    currentElement = dit_Or_Dah(countTimeButtonPress(button_MC)); // convert the current button press to an elment
-    if (currentElement != '\0'){ // only add the element to the letter if it is a valid one
-      morseCode += currentElement;
-      Serial.print("current buffer: ");
-      Serial.println(morseCode); // only print when the morse code is updated
+    pressTime = countTimeButtonPress(button_MC); // count the time the button is pressed
+    if (pressTime >= CLR_BUFFER){
+      morseCode = ""; // reset the morse code if the button is pressed for too long
+      Serial.println("Buffer cleared.");
+    }
+    else{
+      currentElement = dit_Or_Dah(pressTime); // convert the current button press to an elment
+      if (currentElement != '\0'){ // only add the element to the letter if it is a valid one
+        morseCode += currentElement;
+        Serial.print("current buffer: ");
+        Serial.println(morseCode); // only print when the morse code is updated
+      }
     }
   }
 
@@ -60,10 +67,16 @@ void loop(){
 /*  EOW Control */
   if (digitalRead(button_EOW) == HIGH && EOW == false){
     EOW = true;
-    message += ' '; // add a space to the word
-    Serial.println(message);
+    if (message.length() > 0){
+      if (message[message.length() - 1] != ' '){
+        message += ' '; // add a space to the word
+        Serial.println("message buffer: [ " + message + " ]");
+      }
+    }
   }
   else if (digitalRead(button_EOW) == LOW && EOW == true){
     EOW = false; // reset EOW flag
   }
+
+/*  EOM control*/
 }

@@ -32,13 +32,13 @@ char currentElement = '\0';
 
 
 // Dit duration ms (dot)
-const int DIT = 500; //
+const int DIT = 250; //
 // Dah duration ms (dash)
-const int DAH = 1000;
+const int DAH = 500;
 // Acceptable delay
-const unsigned int DELAY = 250;
+const unsigned int DELAY = 125;
 // CLR buffer
-const unsigned int CLR_BUFFER = 2000;
+const unsigned int CLR_BUFFER = 1000;
 
 // Morse code table
 typedef struct {
@@ -84,7 +84,7 @@ int sevSegChars[35][8] {
 	          {'d',0,1,1,1,1,0,1},//d 
 	          {'e',1,0,0,1,1,1,1},//E 
 	          {'f',1,0,0,0,1,1,1},//F 
-	          {'g',1,0,1,1,1,1,0},//G 
+	          {'g',1,0,1,1,1,1,1},//G 
 	          {'h',0,1,1,0,1,1,1},//H 
 	          {'i',0,0,0,0,1,1,0},//I 
 	          {'j',1,1,1,1,1,0,0},//J 
@@ -133,5 +133,10 @@ char morseToASCII(String morseCode);
  * Write a letter to the 7-segment display
  */
 void writeToSevSeg(char letter);
+
+/*
+ * Write a message to the 7-segment display
+ */ 
+ void writeMessageToSevSeg(String message);
 
 #endif

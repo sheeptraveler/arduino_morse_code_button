@@ -71,8 +71,11 @@ void loop(){
       if (message[message.length() - 1] != ' '){
         message += ' '; // add a space to the word
         Serial.println("message buffer: [ " + message + " ]");
+
       }
     }
+    // write the message to the 7-segment display
+    writeMessageToSevSeg(message);
   }
   else if (digitalRead(button_EOW) == LOW && EOW == true){
     EOW = false; // reset EOW flag

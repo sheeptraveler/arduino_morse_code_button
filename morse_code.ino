@@ -95,10 +95,34 @@ void writeToSevSeg(char letter){
   }
   else{
     // If the letter is not found, turn off all segments and print an error message
+    // NOTE: Common anode means that the segments are off when the voltage is high
     for (int i = 0; i < sizeof(segmentPins)/sizeof(byte); i++){
-      digitalWrite(segmentPins[i], LOW);
+      digitalWrite(segmentPins[i], HIGH);
     }
     Serial.println("Letter " + String(letter) + " not found in the table.");
   }
 }
 
+/*
+ * Write a message to the 7-segment display
+ */ 
+ void writeMessageToSevSeg(String message){
+  // Clear the display
+  for (int i = 0; i < sizeof(segmentPins)/sizeof(byte); i++){
+    digitalWrite(segmentPins[i], HIGH);
+  }
+  
+  // Write the message to the display
+  for (int i = 0; i < message.length(); i++){
+    if (message[i] == ' '){
+      // If there is a space, turn off all segments
+      for (int j = 0; j < sizeof(segmentPins)/sizeof(byte); j++){
+        digitalWrite(segmentPins[j], HIGH);
+      }
+    }
+    else{
+      writeToSevSeg(message[i]);
+    }
+    delay(500); // Wait in ms before showing the next letter
+  }
+ }

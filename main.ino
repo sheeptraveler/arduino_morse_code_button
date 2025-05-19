@@ -70,11 +70,11 @@ void loop(){
     pressTime = countTimeButtonPress(button_EOW); 
     // Check to see if the user is trying to clear the message buffer
     if (pressTime >= CLR_BUFFER){
+      EOW = true; // Control of bouncing, so that everything below is executed only once
       message = "";
       Serial.println("Message buffer cleared.");
     }
-    else{
-      EOW = true; // Control of bouncing, so that everything below is executed only once
+    else if (EOW == false && digitalRead(button_EOW) == HIGH) {
       // Need to access element in the message buffer, but only if its not empty
       if (message.length() > 0){
         // Only add space if the last character is not a space
@@ -91,3 +91,4 @@ void loop(){
     EOW = false; // reset EOW flag
   }
 }
+
